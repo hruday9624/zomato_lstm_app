@@ -177,4 +177,4 @@ if ticker_symbol:
     st.pyplot(fig_future)
 
     # Create a DataFrame from future predictions for download
-    future_dates = pd.date_range(start=data.index[-1] + pd.Timedelta(days=1), periods=forecast
+    future_dates = pd.date_range(start=data.index[-1] + pd.Timedelta(days=1), periods=forecast)
