@@ -9,7 +9,6 @@ from tensorflow.keras.layers import LSTM, Dense, Dropout, Bidirectional
 from tensorflow.keras.callbacks import EarlyStopping
 import streamlit as st
 import math
-import yfinance as yf
 
 # Streamlit Web App Setup
 st.title("Stock Price Prediction using LSTM")
@@ -40,9 +39,41 @@ if ticker_symbol:
     data = data[['Close']]
     data = data.dropna()  # Drop any rows with missing values
 
+    # Plot the complete historical data
+    if not data.empty:
+        st.write(f"Historical Data for {company_name}:")
+        fig_hist, ax_hist = plt.subplots(figsize=(14, 5))
+        ax_hist.plot(data.index, data['Close'], label='Historical Close Price')
+        ax_hist.set_xlabel('Date')
+        ax_hist.set_ylabel('Close Price')
+        ax_hist.set_title(f'Historical Stock Price for {company_name}')
+        ax_hist.legend()
+        st.pyplot(fig_hist)
+
+    # Calculate a 30-day moving average and overlay on the historical data plot
+    data['30 Day MA'] = data['Close'].rolling(window=30).mean()
+    fig_hist, ax_hist = plt.subplots(figsize=(14, 5))
+    ax_hist.plot(data.index, data['Close'], label='Historical Close Price')
+    ax_hist.plot(data.index, data['30 Day MA'], label='30 Day Moving Average', color='orange')
+    ax_hist.set_xlabel('Date')
+    ax_hist.set_ylabel('Close Price')
+    ax_hist.set_title(f'Historical Stock Price for {company_name} with Moving Average')
+    ax_hist.legend()
+    st.pyplot(fig_hist)
+
+    # Dummy code for adding a news feed section (replace with actual API usage)
+    st.write(f"Latest News for {company_name}:")
+    news_feed = [
+        "Company announces new product line.",
+        "Stock price surges after earnings report.",
+        "Market analysts upgrade rating."
+    ]
+    for news in news_feed:
+        st.write("- " + news)
+
     # Normalize the data
     scaler = MinMaxScaler(feature_range=(0, 1))
-    scaled_data = scaler.fit_transform(data)
+    scaled_data = scaler.fit_transform(data[['Close']])
 
     # Step 3: Data Splitting
     training_size = int(len(scaled_data) * 0.8)
@@ -89,21 +120,6 @@ if ticker_symbol:
     y_train_actual = scaler.inverse_transform([y_train])
     test_predict = scaler.inverse_transform(test_predict)
     y_test_actual = scaler.inverse_transform([y_test])
-
-    # Calculate Evaluation Metrics
-    train_rmse = math.sqrt(mean_squared_error(y_train_actual[0], train_predict[:, 0]))
-    test_rmse = math.sqrt(mean_squared_error(y_test_actual[0], test_predict[:, 0]))
-    train_mae = mean_absolute_error(y_train_actual[0], train_predict[:, 0])
-    test_mae = mean_absolute_error(y_test_actual[0], test_predict[:, 0])
-    train_mape = np.mean(np.abs((y_train_actual[0] - train_predict[:, 0]) / y_train_actual[0])) * 100
-    test_mape = np.mean(np.abs((y_test_actual[0] - test_predict[:, 0]) / y_test_actual[0])) * 100
-
-    st.write(f"Train RMSE: {train_rmse}")
-    st.write(f"Test RMSE: {test_rmse}")
-    st.write(f"Train MAE: {train_mae}")
-    st.write(f"Test MAE: {test_mae}")
-    st.write(f"Train MAPE: {train_mape}%")
-    st.write(f"Test MAPE: {test_mape}%")
 
     # Step 7: Calculate Confidence Intervals
     # Calculate residuals
@@ -160,6 +176,5 @@ if ticker_symbol:
     ax_future.legend()
     st.pyplot(fig_future)
 
-else:
-    if company_name:
-        st.write("Company not found. Please enter a valid company name.")
+    # Create a DataFrame from future predictions for download
+    future_dates = pd.date_range(start=data.index[-1] + pd.Timedelta(days=1), periods=forecast
