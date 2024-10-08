@@ -177,4 +177,19 @@ if ticker_symbol:
     st.pyplot(fig_future)
 
     # Create a DataFrame from future predictions for download
-    future_dates = pd.date_range(start=data.index[-1] + pd.Timedelta(days=1), periods=forecast)
+    future_dates = pd.date_range(start=data.index[-1] + pd.Timedelta(days=1), periods=forecast_period)
+    future_predictions_df = pd.DataFrame(future_predictions_actual, index=future_dates, columns=["Predicted Close Price"])
+
+    # Provide a download button for the predictions
+    st.write("Download the Future Predictions as CSV:")
+    csv = future_predictions_df.to_csv().encode('utf-8')
+    st.download_button(
+        label="Download Predictions",
+        data=csv,
+        file_name=f'{company_name}_future_predictions.csv',
+        mime='text/csv',
+    )
+
+else:
+    if company_name:
+        st.write("Company not found. Please enter a valid company name.")
