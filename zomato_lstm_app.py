@@ -9,6 +9,7 @@ from tensorflow.keras.layers import LSTM, Dense, Dropout, Bidirectional
 from tensorflow.keras.callbacks import EarlyStopping
 import streamlit as st
 import math
+import tensorflow as tf
 
 # Streamlit Web App Setup
 st.title("Stock Price Prediction using LSTM")
