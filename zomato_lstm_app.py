@@ -168,17 +168,19 @@ if ticker_symbol:
     st.write(f"Future {forecast_period} Days Prediction:")
     st.write(future_predictions_actual)
 
-    # Plot future predictions
+    # Plot future predictions along with test data for better context
     fig_future, ax_future = plt.subplots(figsize=(14, 5))
-    ax_future.plot(range(1, forecast_period + 1), future_predictions_actual, marker='o', label=f'{forecast_period} Days Prediction')
-    ax_future.set_xlabel('Days into the Future')
+    ax_future.plot(data.index[training_size + time_step:], y_test_actual[0], label='Test Actual')
+    ax_future.plot(data.index[training_size + time_step:], test_predict[:, 0], label='Test Prediction', linestyle='--')
+    future_dates = pd.date_range(start=data.index[-1] + pd.Timedelta(days=1), periods=forecast_period)
+    ax_future.plot(future_dates, future_predictions_actual, marker='o', label=f'{forecast_period} Days Prediction')
+    ax_future.set_xlabel('Date')
     ax_future.set_ylabel('Predicted Close Price')
-    ax_future.set_title(f'Future Stock Price Predictions for {company_name}')
+    ax_future.set_title(f'Future Stock Price Predictions for {company_name} with Test Data Context')
     ax_future.legend()
     st.pyplot(fig_future)
 
     # Create a DataFrame from future predictions for download
-    future_dates = pd.date_range(start=data.index[-1] + pd.Timedelta(days=1), periods=forecast_period)
     future_predictions_df = pd.DataFrame(future_predictions_actual, index=future_dates, columns=["Predicted Close Price"])
 
     # Provide a download button for the predictions
